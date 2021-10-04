@@ -1,0 +1,5 @@
+confini>=0.3.6rc3,<0.5.0
+crypto-dev-signer>=0.4.15rc2,<=0.4.15
+chainlib-eth>=0.0.9a13,<=0.1.0
+eth_erc20>=0.1.2a3,<=0.2.0
+eth-address-index>=0.2.4a1
