@@ -7,6 +7,7 @@ contract TokenUniqueSymbolIndex {
 	// EIP 173
 	address public owner;
 	address newOwner;
+	mapping(address => bool) writers;
 
 	mapping ( bytes32 => uint256 ) public registry;
 	address[] tokens;
@@ -33,7 +34,7 @@ contract TokenUniqueSymbolIndex {
 	}
 
 	function register(address _token) public returns (bool) {
-		require(msg.sender == owner);
+		require(writers[msg.sender]);
 
 		bytes memory token_symbol;
 		bytes32 token_symbol_key;
@@ -82,6 +83,19 @@ contract TokenUniqueSymbolIndex {
 		emit OwnershipTransferred(oldOwner, owner);
 	}
 
+	// Implements Writer
+	function addWriter(address _writer) public returns (bool) {
+		require(owner == msg.sender);
+		writers[_writer] = true;
+		return true;
+	}
+
+	// Implements Writer
+	function deleteWriter(address _writer) public returns (bool) {
+		require(owner == msg.sender);
+		delete writers[_writer];
+		return true;
+	}
 
 	// Implements EIP165
 	function supportsInterface(bytes4 _sum) public pure returns (bool) {
@@ -98,6 +112,9 @@ contract TokenUniqueSymbolIndex {
 			return true;
 		}
 		if (_sum == 0x37a47be4) { // OwnedAccepter
+			return true;
+		}
+		if (_sum == 0x80c84bd6) { // Writer
 			return true;
 		}
 		return false;
