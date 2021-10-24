@@ -45,6 +45,13 @@ class TestTokenUniqueSymbolIndex(TestAddressDeclaratorBase):
 
         self.token_index_address = r['contract_address']
 
+        (tx_hash_hex, o) = c.add_writer(self.token_index_address, self.accounts[0], self.accounts[0])
+        self.rpc.do(o)
+
+        o = receipt(tx_hash_hex)
+        r = self.rpc.do(o)
+        self.assertEqual(r['status'], 1)
+
 
     def test_register(self):
         nonce_oracle = RPCNonceOracle(self.accounts[0], self.rpc)
