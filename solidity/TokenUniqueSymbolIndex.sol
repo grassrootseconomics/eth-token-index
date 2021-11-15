@@ -25,7 +25,7 @@ contract TokenUniqueSymbolIndex {
 		return tokens[_idx + 1];
 	}
 
-	// Implements Registry
+	// Implements RegistryClient
 	function addressOf(bytes32 _key) public view returns ( address ) {
 		uint256 idx;
 
@@ -102,7 +102,7 @@ contract TokenUniqueSymbolIndex {
 		if (_sum == 0xcbdb05c7) { // AccountsIndex
 			return true;
 		}
-		if (_sum == 0xbb34534c) { // Registry
+		if (_sum == 0xbb34534c) { // RegistryClient
 			return true;
 		}
 		if (_sum == 0x01ffc9a7) { // EIP165
