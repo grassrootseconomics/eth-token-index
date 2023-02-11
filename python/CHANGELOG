@@ -1,2 +1,4 @@
-* 0.2.6
-	- Add writer cli tool
+- 0.4.0
+	* upgrade deps
+- 0.2.6
+	* Add writer cli tool
