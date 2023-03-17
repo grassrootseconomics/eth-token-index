@@ -15,7 +15,7 @@ contract TokenUniqueSymbolIndex {
 	event OwnershipTransferred(address indexed previousOwner, address indexed newOwner); // EIP173
 	event AddressAdded(address indexed addedAccount, uint256 indexed accountIndex); // AccountsIndex
 
-	constructor() public {
+	constructor() {
 		owner = msg.sender;
 		tokens.push(address(0));
 	}
@@ -70,6 +70,7 @@ contract TokenUniqueSymbolIndex {
 	function transferOwnership(address _newOwner) public returns (bool) {
 		require(msg.sender == owner);
 		newOwner = _newOwner;
+		return true;
 	}
 
 	// Implements OwnedAccepter
@@ -81,6 +82,7 @@ contract TokenUniqueSymbolIndex {
 		owner = newOwner;
 		newOwner = address(0);
 		emit OwnershipTransferred(oldOwner, owner);
+		return true;
 	}
 
 	// Implements Writer

@@ -1,4 +1,6 @@
+- 0.4.1
+	* Remove solidity compile warnings
 - 0.4.0
-	* upgrade deps
+	* Upgrade deps
 - 0.2.6
 	* Add writer cli tool
