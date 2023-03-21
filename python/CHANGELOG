@@ -1,3 +1,5 @@
+- 0.4.2
+	* Add contract metadata
 - 0.4.1
 	* Remove solidity compile warnings
 - 0.4.0
