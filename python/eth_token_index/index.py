@@ -33,7 +33,7 @@ datadir = os.path.join(moddir, 'data')
 
 def to_identifier(s):
     r = s.encode('utf-8').hex()
-    assert len(r) < 64
+    assert len(r) <= 64
     return '{:0<64}'.format(r)
 
 
@@ -142,6 +142,26 @@ class TokenUniqueSymbolIndex(TxFactory):
         o['params'].append(self.normalize(tx))
         o = j.finalize(o)
         return o
+
+
+    def identifier(self, contract_address, idx, sender_address=ZERO_ADDRESS, id_generator=None):
+        j = JSONRPCRequest(id_generator)
+        o = j.template()
+        o['method'] = 'eth_call'
+        enc = ABIContractEncoder()
+        enc.method('identifier')
+        enc.typ(ABIContractType.UINT256)
+        enc.uint256(idx)
+        data = add_0x(enc.encode())
+        tx = self.template(sender_address, contract_address)
+        tx = self.set_code(tx, data)
+        o['params'].append(self.normalize(tx))
+        o = j.finalize(o)
+        return o
+
+
+    def identifier_count(self, contract_address, sender_address=ZERO_ADDRESS, id_generator=None):
+        return self.call_noarg('identifierCount', contract_address, sender_address=sender_address, id_generator=id_generator)
 
 
     @classmethod

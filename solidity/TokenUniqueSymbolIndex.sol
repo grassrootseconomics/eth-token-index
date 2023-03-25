@@ -12,7 +12,7 @@ contract TokenUniqueSymbolIndex {
 	address public owner;
 
 	// Implements Registry
-	bytes32[] public identifiers;
+	bytes32[] public identifierList;
 
 	// Implements EIP173
 	event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
@@ -35,6 +35,7 @@ contract TokenUniqueSymbolIndex {
 	constructor() {
 		owner = msg.sender;
 		tokens.push(address(0));
+		identifierList.push(bytes32(0));
 	}
 
 	// Implements AccountsIndex
@@ -71,7 +72,7 @@ contract TokenUniqueSymbolIndex {
 
 		registry[token_symbol_key] = tokens.length;
 		tokens.push(_token);
-		identifiers.push(token_symbol_key);
+		identifierList.push(token_symbol_key);
 		tokenIndex[_token] = token_symbol_key;
 
 		emit AddressKey(token_symbol_key, _token);
@@ -89,18 +90,20 @@ contract TokenUniqueSymbolIndex {
 		uint256 i;
 		uint256 l;
 
-		require(isWriter[msg.sender], 'ERR_AXX');
+		require(isWriter[msg.sender] || msg.sender == owner, 'ERR_AXX');
 		require(tokenIndex[_token] != bytes32(0), 'ERR_NOT_FOUND');
 
 		l = tokens.length - 1;
-
 		i = registry[tokenIndex[_token]];
 		if (i < l) {
 			tokens[i] = tokens[l];
-			identifiers[i] = identifiers[l];
+			identifierList[i] = identifierList[l];
 		}		
+		registry[tokenIndex[tokens[i]]] = i;
 		tokens.pop();
+		identifierList.pop();
 		registry[tokenIndex[_token]] = 0;
+
 		emit AddressRemoved(_token);
 		return true;
 	}
@@ -157,13 +160,18 @@ contract TokenUniqueSymbolIndex {
 	}
 
 	// Implements Registry
+	function identifier(uint256 _idx) public view returns(bytes32) {
+		return identifierList[_idx + 1];
+	}
+
+	// Implements Registry
 	function identifierCount() public view returns(uint256) {
-		return identifiers.length;
+		return identifierList.length - 1;
 	}
 
 	// Implements EIP165
 	function supportsInterface(bytes4 _sum) public pure returns (bool) {
-		if (_sum == 0x12625fe5) { // Registry
+		if (_sum == 0xeffbf671) { // Registry
 			return true;
 		}
 		if (_sum == 0xb7bca625) { // AccountsIndex 
