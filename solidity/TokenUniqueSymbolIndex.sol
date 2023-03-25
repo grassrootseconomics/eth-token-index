@@ -3,15 +3,16 @@ pragma solidity >=0.8.0;
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 contract TokenUniqueSymbolIndex {
-
-	// EIP 173
-	address public owner;
 	mapping(address => bool) isWriter;
-
 	mapping ( bytes32 => uint256 ) registry;
-	//address[] tokenIndex;
 	mapping ( address => bytes32 ) tokenIndex;
 	address[] tokens;
+
+	// Implements EIP173
+	address public owner;
+
+	// Implements Registry
+	bytes32[] public identifiers;
 
 	// Implements EIP173
 	event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
@@ -70,7 +71,9 @@ contract TokenUniqueSymbolIndex {
 
 		registry[token_symbol_key] = tokens.length;
 		tokens.push(_token);
+		identifiers.push(token_symbol_key);
 		tokenIndex[_token] = token_symbol_key;
+
 		emit AddressKey(token_symbol_key, _token);
 		emit AddressAdded(_token);
 		return true;
@@ -94,6 +97,7 @@ contract TokenUniqueSymbolIndex {
 		i = registry[tokenIndex[_token]];
 		if (i < l) {
 			tokens[i] = tokens[l];
+			identifiers[i] = identifiers[l];
 		}		
 		tokens.pop();
 		registry[tokenIndex[_token]] = 0;
@@ -150,6 +154,11 @@ contract TokenUniqueSymbolIndex {
 		emit WriterDeleted(_writer);
 
 		return true;
+	}
+
+	// Implements Registry
+	function identifierCount() public view returns(uint256) {
+		return identifiers.length;
 	}
 
 	// Implements EIP165
