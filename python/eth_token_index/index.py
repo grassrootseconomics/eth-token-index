@@ -32,9 +32,9 @@ datadir = os.path.join(moddir, 'data')
 
 
 def to_identifier(s):
-    h = hashlib.new('sha256')
-    h.update(s.encode('utf-8'))
-    return h.digest().hex()
+    r = s.encode('utf-8').hex()
+    assert len(r) < 64
+    return '{:0<64}'.format(r)
 
 
 class TokenUniqueSymbolIndex(TxFactory):

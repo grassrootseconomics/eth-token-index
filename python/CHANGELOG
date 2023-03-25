@@ -1,3 +1,7 @@
+- 0.6.0
+	* Use literal keys instead of hashes in registry
+- 0.5.0
+	* Update python classifiers
 - 0.4.3
 	* Upgrade deps
 - 0.4.2

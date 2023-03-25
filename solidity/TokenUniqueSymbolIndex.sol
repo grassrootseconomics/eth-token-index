@@ -1,19 +1,35 @@
-pragma solidity >0.6.11;
+pragma solidity >=0.8.0;
 
-// SPDX-License-Identifier: GPL-3.0-or-later
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 contract TokenUniqueSymbolIndex {
 
 	// EIP 173
 	address public owner;
-	address newOwner;
-	mapping(address => bool) writers;
+	mapping(address => bool) isWriter;
 
-	mapping ( bytes32 => uint256 ) public registry;
+	mapping ( bytes32 => uint256 ) registry;
+	//address[] tokenIndex;
+	mapping ( address => bytes32 ) tokenIndex;
 	address[] tokens;
 
-	event OwnershipTransferred(address indexed previousOwner, address indexed newOwner); // EIP173
-	event AddressAdded(address indexed addedAccount, uint256 indexed accountIndex); // AccountsIndex
+	// Implements EIP173
+	event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
+
+	// Implements AccountsIndex
+	event AddressKey(bytes32 indexed _symbol, address _token);
+
+	// Implements AccountsIndex
+	event AddressAdded(address _token);
+
+	// Implements AccountsIndexMutable
+	event AddressRemoved(address _token);
+
+	// Implements Writer
+	event WriterAdded(address _writer);
+
+	// Implements Writer
+	event WriterDeleted(address _writer);
 
 	constructor() {
 		owner = msg.sender;
@@ -33,8 +49,10 @@ contract TokenUniqueSymbolIndex {
 		return tokens[idx];
 	}
 
+	// Attempt to register the token at the given address.
+	// Will revet if symbol cannot be retrieved, or if symbol already exists.
 	function register(address _token) public returns (bool) {
-		require(writers[msg.sender]);
+		require(isWriter[msg.sender]);
 
 		bytes memory token_symbol;
 		bytes32 token_symbol_key;
@@ -44,20 +62,55 @@ contract TokenUniqueSymbolIndex {
 		require(_ok);
 
 		token_symbol = abi.decode(_r, (bytes));
-		token_symbol_key = sha256(token_symbol);
+		require(token_symbol.length <= 32, 'ERR_TOKEN_SYMBOL_TOO_LONG');
+		token_symbol_key = bytes32(token_symbol);
 
 		idx = registry[token_symbol_key];
 		require(idx == 0);
 
 		registry[token_symbol_key] = tokens.length;
 		tokens.push(_token);
-		emit AddressAdded(_token, tokens.length - 1);
+		tokenIndex[_token] = token_symbol_key;
+		emit AddressKey(token_symbol_key, _token);
+		emit AddressAdded(_token);
 		return true;
 	}
 
 	// Implements AccountsIndex
 	function add(address _token) public returns (bool) {
 		return register(_token);
+	}
+
+	// Implements AccountsIndexMutable
+	function remove(address _token) external returns (bool) {
+		uint256 i;
+		uint256 l;
+
+		require(isWriter[msg.sender], 'ERR_AXX');
+		require(tokenIndex[_token] != bytes32(0), 'ERR_NOT_FOUND');
+
+		l = tokens.length - 1;
+
+		i = registry[tokenIndex[_token]];
+		if (i < l) {
+			tokens[i] = tokens[l];
+		}		
+		tokens.pop();
+		registry[tokenIndex[_token]] = 0;
+		emit AddressRemoved(_token);
+		return true;
+	}
+
+	// Implements AccountsIndexMutable
+	function activate(address _token) public pure returns(bool) {
+		_token;
+		return false;
+	}
+
+	// Implements AccountsIndexMutable
+	function deactivate(address _token) public pure returns(bool) {
+		_token;
+		return false;
 	}
 
 
@@ -68,52 +121,52 @@ contract TokenUniqueSymbolIndex {
 
 	// Implements EIP173
 	function transferOwnership(address _newOwner) public returns (bool) {
-		require(msg.sender == owner);
-		newOwner = _newOwner;
-		return true;
-	}
-
-	// Implements OwnedAccepter
-	function acceptOwnership() public returns (bool) {
 		address oldOwner;
 
-		require(msg.sender == newOwner);
-		oldOwner = owner; 
-		owner = newOwner;
-		newOwner = address(0);
+		require(msg.sender == owner);
+		oldOwner = owner;
+		owner = _newOwner;
+
 		emit OwnershipTransferred(oldOwner, owner);
+
 		return true;
 	}
 
 	// Implements Writer
 	function addWriter(address _writer) public returns (bool) {
 		require(owner == msg.sender);
-		writers[_writer] = true;
+		isWriter[_writer] = true;
+
+		emit WriterAdded(_writer);
+
 		return true;
 	}
 
 	// Implements Writer
 	function deleteWriter(address _writer) public returns (bool) {
 		require(owner == msg.sender);
-		delete writers[_writer];
+		delete isWriter[_writer];
+
+		emit WriterDeleted(_writer);
+
 		return true;
 	}
 
 	// Implements EIP165
 	function supportsInterface(bytes4 _sum) public pure returns (bool) {
-		if (_sum == 0xcbdb05c7) { // AccountsIndex
+		if (_sum == 0x12625fe5) { // Registry
 			return true;
 		}
-		if (_sum == 0xbb34534c) { // RegistryClient
+		if (_sum == 0xb7bca625) { // AccountsIndex 
+			return true;
+		}
+		if (_sum == 0x9479f0ae) { // AccountsIndexMutable
 			return true;
 		}
 		if (_sum == 0x01ffc9a7) { // EIP165
 			return true;
 		}
 		if (_sum == 0x9493f8b2) { // EIP173
-			return true;
-		}
-		if (_sum == 0x37a47be4) { // OwnedAccepter
 			return true;
 		}
 		if (_sum == 0x80c84bd6) { // Writer
