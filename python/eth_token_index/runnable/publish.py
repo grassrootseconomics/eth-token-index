@@ -56,22 +56,6 @@ settings = process_settings(settings, config)
 logg.debug('settings loaded:\n{}'.format(settings))
 
 
-
-#arg_flags = chainlib.eth.cli.argflag_std_write
-#argparser = chainlib.eth.cli.ArgumentParser(arg_flags)
-#args = argparser.parse_args()
-#
-#config = chainlib.eth.cli.Config.from_args(args, arg_flags, default_fee_limit=TokenUniqueSymbolIndex.gas())
-#
-#wallet = chainlib.eth.cli.Wallet()
-#wallet.from_config(config)
-#
-#rpc = chainlib.eth.cli.Rpc(wallet=wallet)
-#conn = rpc.connect_by_config(config)
-#
-#chain_spec = ChainSpec.from_chain_str(config.get('CHAIN_SPEC'))
-
-
 def main():
     conn = settings.get('CONN')
     c = TokenUniqueSymbolIndex(
