@@ -1,3 +1,6 @@
+- 0.6.1
+	* Update list tool to chainlib 0.4.x arg flags
+	* Skip listing of superseded tokens (reverse lookup does not match entry index)
 - 0.6.0
 	* Use literal keys instead of hashes in registry
 - 0.5.0
