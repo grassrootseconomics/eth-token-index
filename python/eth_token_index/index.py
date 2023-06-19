@@ -85,6 +85,18 @@ class TokenUniqueSymbolIndex(TxFactory):
         return tx
 
 
+    def remove(self, contract_address, sender_address, address, tx_format=TxFormat.JSONRPC):
+        enc = ABIContractEncoder()
+        enc.method('remove')
+        enc.typ(ABIContractType.ADDRESS)
+        enc.address(address)
+        data = enc.get()
+        tx = self.template(sender_address, contract_address, use_nonce=True)
+        tx = self.set_code(tx, data)
+        tx = self.finalize(tx, tx_format)
+        return tx
+
+
     def add_writer(self, contract_address, sender_address, address, tx_format=TxFormat.JSONRPC, id_generator=None):
         enc = ABIContractEncoder()
         enc.method('addWriter')

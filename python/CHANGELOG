@@ -1,3 +1,5 @@
+- 0.6.2
+	* Prevent double removal on index entry
 - 0.6.1
 	* Update list tool to chainlib 0.4.x arg flags
 	* Skip listing of superseded tokens (reverse lookup does not match entry index)

@@ -98,11 +98,12 @@ contract TokenUniqueSymbolIndex {
 		if (i < l) {
 			tokens[i] = tokens[l];
 			identifierList[i] = identifierList[l];
-		}		
+		}
 		registry[tokenIndex[tokens[i]]] = i;
 		tokens.pop();
 		identifierList.pop();
 		registry[tokenIndex[_token]] = 0;
+		tokenIndex[_token] = bytes32(0);
 
 		emit AddressRemoved(_token);
 		return true;

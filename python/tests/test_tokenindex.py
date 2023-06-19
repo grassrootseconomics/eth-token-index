@@ -7,6 +7,8 @@ import hashlib
 
 # external imports
 from chainlib.eth.unittest.ethtester import EthTesterCase
+from chainlib.eth.constant import ZERO_ADDRESS
+from chainlib.eth.address import is_same_address
 from chainlib.eth.nonce import RPCNonceOracle
 from chainlib.eth.tx import receipt
 from chainlib.error import JSONRPCException
@@ -70,7 +72,7 @@ class TestTokenUniqueSymbolIndex(EthTesterCase):
         
         (tx_hash_hex, o) = c.register(self.address, self.accounts[0], self.foo_token_address)
         self.rpc.do(o)
-        e = unpack(bytes.fromhex(strip_0x(o['params'][0])), self.chain_spec)
+        #e = unpack(bytes.fromhex(strip_0x(o['params'][0])), self.chain_spec)
 
         o = receipt(tx_hash_hex)
         r = self.rpc.do(o)
@@ -91,6 +93,40 @@ class TestTokenUniqueSymbolIndex(EthTesterCase):
         count = c.parse_entry_count(r)
         self.assertEqual(count, 1)
 
+
+    def test_remove(self):
+        nonce_oracle = RPCNonceOracle(self.accounts[0], self.rpc)
+        c = TokenUniqueSymbolIndex(self.chain_spec, signer=self.signer, nonce_oracle=nonce_oracle)
+        
+        (tx_hash_hex, o) = c.register(self.address, self.accounts[0], self.foo_token_address)
+        self.rpc.do(o)
+        #e = unpack(bytes.fromhex(strip_0x(o['params'][0])), self.chain_spec)
+
+        (tx_hash_hex, o) = c.remove(self.address, self.accounts[0], self.foo_token_address)
+        self.rpc.do(o)
+        o = receipt(tx_hash_hex)
+        r = self.rpc.do(o)
+        self.assertEqual(r['status'], 1)
+
+        o = c.address_of(self.address, 'FOO', sender_address=self.accounts[0])
+        r = self.rpc.do(o)
+        address = c.parse_address_of(r)
+        self.assertTrue(is_same_address(address, ZERO_ADDRESS))
+        
+        o = c.entry(self.address, 0, sender_address=self.accounts[0])
+        with self.assertRaises(JSONRPCException):
+            self.rpc.do(o)
+        
+        o = c.entry_count(self.address, sender_address=self.accounts[0])
+        r = self.rpc.do(o)
+        count = c.parse_entry_count(r)
+        self.assertEqual(count, 0)
+
+        (tx_hash_hex, o) = c.remove(self.address, self.accounts[0], self.foo_token_address)
+        self.rpc.do(o)
+        o = receipt(tx_hash_hex)
+        r = self.rpc.do(o)
+        self.assertEqual(r['status'], 0)
 
 
     def test_identifiers(self):
