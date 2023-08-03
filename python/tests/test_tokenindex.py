@@ -252,7 +252,21 @@ class TestTokenUniqueSymbolIndex(EthTesterCase):
         self.assertEqual(int(r, 16), 2)
 
 
+    def test_have(self):
+        c = AccountsIndex(self.chain_spec)
+        o = c.have(self.address, self.foo_token_address, sender_address=self.accounts[0])
+        r = self.rpc.do(o)
+        self.assertEqual(int(r, 16), 0)
 
+        nonce_oracle = RPCNonceOracle(self.accounts[0], self.rpc)
+        c = TokenUniqueSymbolIndex(self.chain_spec, signer=self.signer, nonce_oracle=nonce_oracle)
+        (tx_hash_hex, o) = c.register(self.address, self.accounts[0], self.foo_token_address)
+        self.rpc.do(o)
+
+        c = AccountsIndex(self.chain_spec)
+        o = c.have(self.address, self.foo_token_address, sender_address=self.accounts[0])
+        r = self.rpc.do(o)
+        self.assertEqual(int(r, 16), 1)
 
 
 if __name__ == '__main__':

@@ -85,6 +85,12 @@ contract TokenUniqueSymbolIndex {
 		return register(_token);
 	}
 
+	// Implements AccountsIndex
+	function time(address _token) public pure returns(uint256) {
+		_token;
+		return 0;
+	}
+
 	// Implements AccountsIndexMutable
 	function remove(address _token) external returns (bool) {
 		uint256 i;
@@ -168,6 +174,11 @@ contract TokenUniqueSymbolIndex {
 	// Implements Registry
 	function identifierCount() public view returns(uint256) {
 		return identifierList.length - 1;
+	}
+
+	// Implements AccountsIndex	
+	function have(address _token) public view returns(bool) {
+		return tokenIndex[_token] != bytes32(0x0);
 	}
 
 	// Implements EIP165
