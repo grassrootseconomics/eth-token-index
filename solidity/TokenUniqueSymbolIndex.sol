@@ -54,7 +54,7 @@ contract TokenUniqueSymbolIndex {
 	// Attempt to register the token at the given address.
 	// Will revet if symbol cannot be retrieved, or if symbol already exists.
 	function register(address _token) public returns (bool) {
-		require(isWriter[msg.sender]);
+		require(isWriter[msg.sender] || msg.sender == owner, 'ERR_AXX');
 
 		bytes memory token_symbol;
 		bytes32 token_symbol_key;
